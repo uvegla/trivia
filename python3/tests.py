@@ -17,6 +17,8 @@ class MainLoopTestCase(TestCase):
     def setUp(self) -> None:
         self.logger = BufferedLogger()
 
+        self.maxDiff = None
+
     def test_1(self):
         main_loop(1, self.logger)
 

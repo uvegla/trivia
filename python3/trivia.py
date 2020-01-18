@@ -32,7 +32,6 @@ class Game:
         self.logger = logger
 
         self.players: List[Player] = []
-        self.places = [0] * 6
         self.purses = [0] * 6
         self.in_penalty_box = [0] * 6
 
@@ -52,7 +51,6 @@ class Game:
 
     def add(self, player: Player):
         self.players.append(player)
-        self.places[self.how_many_players] = 0
         self.purses[self.how_many_players] = 0
         self.in_penalty_box[self.how_many_players] = False
 
@@ -66,13 +64,15 @@ class Game:
         return len(self.players)
 
     def move_player(self, player_id: int, roll: int):
-        self.places[player_id] = self.places[player_id] + roll
-        if self.places[player_id] > 11:
-            self.places[player_id] = self.places[player_id] - 12
+        player = self.players[player_id]
+
+        player.position += roll
+        if player.position > 11:
+            player.position = player.position - 12
 
         self.logger.print(self.players[player_id].name +
                           '\'s new location is ' +
-                          str(self.places[player_id]))
+                          str(player.position))
 
     def roll(self, roll):
         self.logger.print("%s is the current player" %
@@ -92,7 +92,7 @@ class Game:
         self._ask_question()
 
     def _ask_question(self):
-        current_position = self.places[self.current_player]
+        current_position = self.players[self.current_player].position
         category = self.get_category(current_position)
         self.logger.print("The category is %s" % category)
         if category == 'Pop':
@@ -104,7 +104,7 @@ class Game:
         if category == 'Rock':
             self.logger.print(self.rock_questions.pop(0))
 
-    def get_category(self, position):
+    def get_category(self, position: int):
         if position == 0:
             return 'Pop'
         if position == 4:
