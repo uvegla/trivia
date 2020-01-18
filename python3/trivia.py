@@ -39,7 +39,7 @@ class Game:
         self.rock_questions = []
 
         self.current_player = 0
-        self.is_getting_out_of_penalty_box = False
+        self.staying_penalty_box = True
 
         for i in range(50):
             self.pop_questions.append("Pop Question %s" % i)
@@ -77,20 +77,16 @@ class Game:
         self.logger.print("They have rolled a %s" % roll)
 
         if self.in_penalty_box[self.current_player]:
-            if roll % 2 != 0:
-                self.is_getting_out_of_penalty_box = True
+            self.staying_penalty_box = roll % 2 == 0
+            if self.staying_penalty_box:
+                self.logger.print("%s is not getting out of the penalty box" % self.players[self.current_player])
+                return
 
-                self.logger.print("%s is getting out of the penalty box" %
-                                  self.players[self.current_player])
-                self.move_player(self.current_player, roll)
-                self._ask_question()
-            else:
-                self.logger.print(
-                    "%s is not getting out of the penalty box" % self.players[self.current_player])
-                self.is_getting_out_of_penalty_box = False
-        else:
-            self.move_player(self.current_player, roll)
-            self._ask_question()
+            self.logger.print("%s is getting out of the penalty box" %
+                              self.players[self.current_player])
+
+        self.move_player(self.current_player, roll)
+        self._ask_question()
 
     def _ask_question(self):
         current_position = self.places[self.current_player]
@@ -136,7 +132,7 @@ class Game:
             self.current_player = 0
 
     def was_correctly_answered(self):
-        if self.in_penalty_box[self.current_player] and not self.is_getting_out_of_penalty_box:
+        if self.in_penalty_box[self.current_player] and self.staying_penalty_box:
             self.next_player()
             return True
 
