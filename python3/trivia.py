@@ -32,7 +32,6 @@ class Game:
         self.logger = logger
 
         self.players: List[Player] = []
-        self.purses = [0] * 6
         self.in_penalty_box = [0] * 6
 
         self.pop_questions = []
@@ -51,7 +50,6 @@ class Game:
 
     def add(self, player: Player):
         self.players.append(player)
-        self.purses[self.how_many_players] = 0
         self.in_penalty_box[self.how_many_players] = False
 
         self.logger.print(player.name + " was added")
@@ -120,8 +118,9 @@ class Game:
         return 'Rock'
 
     def add_coin(self, player_id):
-        self.purses[player_id] += 1
-        self.logger.print(self.players[player_id].name + ' now has ' + str(self.purses[player_id]) + ' Gold Coins.')
+        player = self.players[player_id]
+        player.purse += 1
+        self.logger.print(self.players[player_id].name + ' now has ' + str(player.purse) + ' Gold Coins.')
 
     def next_player(self):
         self.current_player += 1
@@ -151,7 +150,7 @@ class Game:
         return True
 
     def _did_player_win(self):
-        return not (self.purses[self.current_player] == 6)
+        return not (self.players[self.current_player].purse == 6)
 
 
 def main_loop(seed: int = None, logger: Logger = ConsoleLogger()):
