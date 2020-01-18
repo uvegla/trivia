@@ -45,10 +45,7 @@ class Game:
             self.pop_questions.append("Pop Question %s" % i)
             self.science_questions.append("Science Question %s" % i)
             self.sports_questions.append("Sports Question %s" % i)
-            self.rock_questions.append(self.create_rock_question(i))
-
-    def create_rock_question(self, index):
-        return "Rock Question %s" % index
+            self.rock_questions.append("Rock Question %s" % i)
 
     def add(self, player_name):
         self.players.append(player_name)
@@ -65,6 +62,15 @@ class Game:
     def how_many_players(self):
         return len(self.players)
 
+    def move_player(self, player_id: int, roll: int):
+        self.places[player_id] = self.places[player_id] + roll
+        if self.places[player_id] > 11:
+            self.places[player_id] = self.places[player_id] - 12
+
+        self.logger.print(self.players[player_id] +
+                          '\'s new location is ' +
+                          str(self.places[player_id]))
+
     def roll(self, roll):
         self.logger.print("%s is the current player" %
                           self.players[self.current_player])
@@ -76,61 +82,47 @@ class Game:
 
                 self.logger.print("%s is getting out of the penalty box" %
                                   self.players[self.current_player])
-                self.places[self.current_player] = self.places[self.current_player] + roll
-                if self.places[self.current_player] > 11:
-                    self.places[self.current_player] = self.places[self.current_player] - 12
-
-                self.logger.print(self.players[self.current_player] +
-                                  '\'s new location is ' +
-                                  str(self.places[self.current_player]))
-                self.logger.print(
-                    "The category is %s" %
-                    self._current_category)
+                self.move_player(self.current_player, roll)
                 self._ask_question()
             else:
                 self.logger.print(
                     "%s is not getting out of the penalty box" % self.players[self.current_player])
                 self.is_getting_out_of_penalty_box = False
         else:
-            self.places[self.current_player] = self.places[self.current_player] + roll
-            if self.places[self.current_player] > 11:
-                self.places[self.current_player] = self.places[self.current_player] - 12
-
-            self.logger.print(self.players[self.current_player] +
-                              '\'s new location is ' +
-                              str(self.places[self.current_player]))
-            self.logger.print("The category is %s" % self._current_category)
+            self.move_player(self.current_player, roll)
             self._ask_question()
 
     def _ask_question(self):
-        if self._current_category == 'Pop':
+        current_position = self.places[self.current_player]
+        category = self.get_category(current_position)
+        self.logger.print("The category is %s" % category)
+        if category == 'Pop':
             self.logger.print(self.pop_questions.pop(0))
-        if self._current_category == 'Science':
+        if category == 'Science':
             self.logger.print(self.science_questions.pop(0))
-        if self._current_category == 'Sports':
+        if category == 'Sports':
             self.logger.print(self.sports_questions.pop(0))
-        if self._current_category == 'Rock':
+        if category == 'Rock':
             self.logger.print(self.rock_questions.pop(0))
 
-    @property
-    def _current_category(self):
-        if self.places[self.current_player] == 0:
+    def get_category(self, position):
+        if position == 0:
             return 'Pop'
-        if self.places[self.current_player] == 4:
+        if position == 4:
             return 'Pop'
-        if self.places[self.current_player] == 8:
+        if position == 8:
             return 'Pop'
-        if self.places[self.current_player] == 1:
+        if position == 1:
             return 'Science'
-        if self.places[self.current_player] == 5:
+        if position == 5:
             return 'Science'
-        if self.places[self.current_player] == 9:
+        if position == 9:
             return 'Science'
-        if self.places[self.current_player] == 2:
+        if position == 2:
             return 'Sports'
-        if self.places[self.current_player] == 6:
+        if position == 6:
             return 'Sports'
-        if self.places[self.current_player] == 10:
+        if position == 10:
             return 'Sports'
         return 'Rock'
 
@@ -144,28 +136,17 @@ class Game:
             self.current_player = 0
 
     def was_correctly_answered(self):
-        if self.in_penalty_box[self.current_player]:
-            if self.is_getting_out_of_penalty_box:
-                self.logger.print('Answer was correct!!!!')
-                self.add_coin(self.current_player)
-
-                winner = self._did_player_win()
-                self.next_player()
-
-                return winner
-            else:
-                self.next_player()
-                return True
-
-        else:
-
-            self.logger.print("Answer was corrent!!!!")
-            self.add_coin(self.current_player)
-
-            winner = self._did_player_win()
+        if self.in_penalty_box[self.current_player] and not self.is_getting_out_of_penalty_box:
             self.next_player()
+            return True
 
-            return winner
+        self.logger.print("Answer was correct!!!!")
+        self.add_coin(self.current_player)
+
+        winner = self._did_player_win()
+        self.next_player()
+
+        return winner
 
     def wrong_answer(self):
         self.logger.print('Question was incorrectly answered')
