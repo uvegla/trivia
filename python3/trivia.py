@@ -5,6 +5,7 @@ from itertools import cycle
 from random import randrange
 from typing import List
 
+from board import Board
 from player import Player
 
 
@@ -33,6 +34,7 @@ class Game:
         self.logger = logger
 
         self.players = players
+        self.board = Board()
 
         for i, player in enumerate(players, 1):
             self.logger.print(player.name + " was added")
@@ -79,37 +81,9 @@ class Game:
 
     def _ask_question(self):
         current_position = self.current_player.position
-        category = self.get_category(current_position)
+        category = self.board.get_category(current_position)
         self.logger.print("The category is %s" % category)
-        if category == 'Pop':
-            self.logger.print(self.pop_questions.pop(0))
-        if category == 'Science':
-            self.logger.print(self.science_questions.pop(0))
-        if category == 'Sports':
-            self.logger.print(self.sports_questions.pop(0))
-        if category == 'Rock':
-            self.logger.print(self.rock_questions.pop(0))
-
-    def get_category(self, position: int):
-        if position == 0:
-            return 'Pop'
-        if position == 4:
-            return 'Pop'
-        if position == 8:
-            return 'Pop'
-        if position == 1:
-            return 'Science'
-        if position == 5:
-            return 'Science'
-        if position == 9:
-            return 'Science'
-        if position == 2:
-            return 'Sports'
-        if position == 6:
-            return 'Sports'
-        if position == 10:
-            return 'Sports'
-        return 'Rock'
+        self.logger.print(self.board.get_question(category))
 
     def add_coin(self, player_id):
         self.current_player.purse += 1
