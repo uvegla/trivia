@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import abc
-from abc import ABC
 
 
 class Logger:
@@ -48,9 +47,6 @@ class Game:
 
     def create_rock_question(self, index):
         return "Rock Question %s" % index
-
-    def is_playable(self):
-        return self.how_many_players >= 2
 
     def add(self, player_name):
         self.players.append(player_name)
@@ -174,8 +170,6 @@ from random import randrange
 
 def main_loop(seed: int = None, logger: Logger = ConsoleLogger()):
     random.seed(a=seed)
-
-    not_a_winner = False
 
     game = Game(logger)
 
