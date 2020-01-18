@@ -32,7 +32,6 @@ class Game:
         self.logger = logger
 
         self.players: List[Player] = []
-        self.in_penalty_box = [0] * 6
 
         self.pop_questions = []
         self.science_questions = []
@@ -50,7 +49,6 @@ class Game:
 
     def add(self, player: Player):
         self.players.append(player)
-        self.in_penalty_box[self.how_many_players] = False
 
         self.logger.print(player.name + " was added")
         self.logger.print("They are player number %s" % len(self.players))
@@ -71,14 +69,15 @@ class Game:
                           self.players[self.current_player])
         self.logger.print("They have rolled a %s" % roll)
 
-        if self.in_penalty_box[self.current_player]:
+        player = self.players[self.current_player]
+
+        if player.in_penalty_box:
             self.staying_penalty_box = roll % 2 == 0
             if self.staying_penalty_box:
                 self.logger.print("%s is not getting out of the penalty box" % self.players[self.current_player])
                 return
 
-            self.logger.print("%s is getting out of the penalty box" %
-                              self.players[self.current_player])
+            self.logger.print("%s is getting out of the penalty box" % self.players[self.current_player])
 
         self.move_player(self.current_player, roll)
         self._ask_question()
@@ -128,7 +127,9 @@ class Game:
             self.current_player = 0
 
     def was_correctly_answered(self):
-        if self.in_penalty_box[self.current_player] and self.staying_penalty_box:
+        player = self.players[self.current_player]
+
+        if player.in_penalty_box and self.staying_penalty_box:
             self.next_player()
             return True
 
@@ -144,7 +145,9 @@ class Game:
         self.logger.print('Question was incorrectly answered')
         self.logger.print(
             self.players[self.current_player].name + " was sent to the penalty box")
-        self.in_penalty_box[self.current_player] = True
+
+        player = self.players[self.current_player]
+        player.in_penalty_box = True
 
         self.next_player()
         return True
