@@ -9,8 +9,11 @@ class Player:
         self.in_penalty_box = False
         self.staying_in_penalty_box = True
 
-    def __repr__(self):
-        return self.__str__()
+    def move(self, steps: int):
+        self.position += steps
+
+        if self.position > 11:
+            self.position = self.position - 12
 
     def __str__(self):
         return self.name

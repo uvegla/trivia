@@ -65,14 +65,8 @@ class Game:
 
     def move_player(self, player_id: int, roll: int):
         player = self.players[player_id]
-
-        player.position += roll
-        if player.position > 11:
-            player.position = player.position - 12
-
-        self.logger.print(self.players[player_id].name +
-                          '\'s new location is ' +
-                          str(player.position))
+        player.move(roll)
+        self.logger.print(self.players[player_id].name + '\'s new location is ' + str(player.position))
 
     def roll(self, roll):
         self.logger.print("%s is the current player" %
