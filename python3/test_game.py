@@ -23,3 +23,16 @@ class GameTests(TestCase):
         self.assertEqual('TestQuestion', self.logger.lines[-1])
         self.board.get_category.assert_called_with(position)
         self.board.get_question.assert_called_with('TestCategory')
+
+    def test_roll_printsCurrentPlayerAndRolledAmount(self):
+        self.game.roll(10)
+        self.assertEqual('First is the current player', self.logger.lines[0])
+        self.assertEqual('They have rolled a 10', self.logger.lines[1])
+
+    def test_roll_printsNewLocationAndQuestion(self):
+        self.board.get_category.return_value = 'TestCategory'
+        self.board.get_question.return_value = 'TestQuestion'
+        self.game.roll(10)
+        self.assertEqual("First's new location is 10", self.logger.lines[-3])
+        self.assertEqual('The category is TestCategory', self.logger.lines[-2])
+        self.assertEqual('TestQuestion', self.logger.lines[-1])
