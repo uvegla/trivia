@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import abc
 import random
+from itertools import cycle
 from random import randrange
 from typing import List
 
@@ -28,17 +29,23 @@ class BufferedLogger(Logger):
 
 
 class Game:
-    def __init__(self, logger: Logger):
+    def __init__(self, players: List[Player], logger: Logger):
         self.logger = logger
 
-        self.players: List[Player] = []
+        self.players = players
+
+        for i, player in enumerate(players, 1):
+            self.logger.print(player.name + " was added")
+            self.logger.print("They are player number %s" % i)
+
+        self.cycle = cycle(self.players)
+        self.current_player: Player = next(self.cycle)
 
         self.pop_questions = []
         self.science_questions = []
         self.sports_questions = []
         self.rock_questions = []
 
-        self.current_player = 0
         self.staying_penalty_box = True
 
         for i in range(50):
@@ -47,43 +54,31 @@ class Game:
             self.sports_questions.append("Sports Question %s" % i)
             self.rock_questions.append("Rock Question %s" % i)
 
-    def add(self, player: Player):
-        self.players.append(player)
-
-        self.logger.print(player.name + " was added")
-        self.logger.print("They are player number %s" % len(self.players))
-
-        return True
-
     @property
     def how_many_players(self):
         return len(self.players)
 
-    def move_player(self, player_id: int, roll: int):
-        player = self.players[player_id]
+    def move_player(self, player: Player, roll: int):
         player.move(roll)
-        self.logger.print(self.players[player_id].name + '\'s new location is ' + str(player.position))
+        self.logger.print(player.name + '\'s new location is ' + str(player.position))
 
     def roll(self, roll):
-        self.logger.print("%s is the current player" %
-                          self.players[self.current_player])
+        self.logger.print("%s is the current player" % self.current_player)
         self.logger.print("They have rolled a %s" % roll)
 
-        player = self.players[self.current_player]
-
-        if player.in_penalty_box:
+        if self.current_player.in_penalty_box:
             self.staying_penalty_box = roll % 2 == 0
             if self.staying_penalty_box:
-                self.logger.print("%s is not getting out of the penalty box" % self.players[self.current_player])
+                self.logger.print("%s is not getting out of the penalty box" % self.current_player)
                 return
 
-            self.logger.print("%s is getting out of the penalty box" % self.players[self.current_player])
+            self.logger.print("%s is getting out of the penalty box" % self.current_player)
 
         self.move_player(self.current_player, roll)
         self._ask_question()
 
     def _ask_question(self):
-        current_position = self.players[self.current_player].position
+        current_position = self.current_player.position
         category = self.get_category(current_position)
         self.logger.print("The category is %s" % category)
         if category == 'Pop':
@@ -117,19 +112,15 @@ class Game:
         return 'Rock'
 
     def add_coin(self, player_id):
-        player = self.players[player_id]
-        player.purse += 1
-        self.logger.print(self.players[player_id].name + ' now has ' + str(player.purse) + ' Gold Coins.')
+        self.current_player.purse += 1
+        self.logger.print(self.current_player.name + ' now has ' + str(self.current_player.purse) + ' Gold Coins.')
 
     def next_player(self):
-        self.current_player += 1
-        if self.current_player == len(self.players):
-            self.current_player = 0
+        # noinspection PyAttributeOutsideInit
+        self.current_player = next(self.cycle)
 
     def was_correctly_answered(self):
-        player = self.players[self.current_player]
-
-        if player.in_penalty_box and self.staying_penalty_box:
+        if self.current_player.in_penalty_box and self.staying_penalty_box:
             self.next_player()
             return True
 
@@ -144,26 +135,21 @@ class Game:
     def wrong_answer(self):
         self.logger.print('Question was incorrectly answered')
         self.logger.print(
-            self.players[self.current_player].name + " was sent to the penalty box")
+            self.current_player.name + " was sent to the penalty box")
 
-        player = self.players[self.current_player]
-        player.in_penalty_box = True
+        self.current_player.in_penalty_box = True
 
         self.next_player()
         return True
 
     def _did_player_win(self):
-        return not (self.players[self.current_player].purse == 6)
+        return not (self.current_player.purse == 6)
 
 
 def main_loop(seed: int = None, logger: Logger = ConsoleLogger()):
     random.seed(a=seed)
 
-    game = Game(logger)
-
-    game.add(Player('Chet'))
-    game.add(Player('Pat'))
-    game.add(Player('Sue'))
+    game = Game([Player('Chet'), Player('Pat'), Player('Sue')], logger)
 
     while True:
         game.roll(randrange(5) + 1)
