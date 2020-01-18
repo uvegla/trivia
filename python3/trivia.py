@@ -30,11 +30,11 @@ class BufferedLogger(Logger):
 
 
 class Game:
-    def __init__(self, players: List[Player], logger: Logger):
+    def __init__(self, board: Board, players: List[Player], logger: Logger):
         self.logger = logger
 
         self.players = players
-        self.board = Board()
+        self.board = board
 
         for i, player in enumerate(players, 1):
             self.logger.print(player.name + " was added")
@@ -77,10 +77,9 @@ class Game:
             self.logger.print("%s is getting out of the penalty box" % self.current_player)
 
         self.move_player(self.current_player, roll)
-        self._ask_question()
+        self.ask_question(self.current_player.position)
 
-    def _ask_question(self):
-        current_position = self.current_player.position
+    def ask_question(self, current_position):
         category = self.board.get_category(current_position)
         self.logger.print("The category is %s" % category)
         self.logger.print(self.board.get_question(category))
@@ -123,7 +122,7 @@ class Game:
 def main_loop(seed: int = None, logger: Logger = ConsoleLogger()):
     random.seed(a=seed)
 
-    game = Game([Player('Chet'), Player('Pat'), Player('Sue')], logger)
+    game = Game(Board(), [Player('Chet'), Player('Pat'), Player('Sue')], logger)
 
     while True:
         game.roll(randrange(5) + 1)
