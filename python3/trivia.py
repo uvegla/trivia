@@ -2,6 +2,9 @@
 import abc
 import random
 from random import randrange
+from typing import List
+
+from player import Player
 
 
 class Logger:
@@ -28,7 +31,7 @@ class Game:
     def __init__(self, logger: Logger):
         self.logger = logger
 
-        self.players = []
+        self.players: List[Player] = []
         self.places = [0] * 6
         self.purses = [0] * 6
         self.in_penalty_box = [0] * 6
@@ -47,13 +50,13 @@ class Game:
             self.sports_questions.append("Sports Question %s" % i)
             self.rock_questions.append("Rock Question %s" % i)
 
-    def add(self, player_name):
-        self.players.append(player_name)
+    def add(self, player: Player):
+        self.players.append(player)
         self.places[self.how_many_players] = 0
         self.purses[self.how_many_players] = 0
         self.in_penalty_box[self.how_many_players] = False
 
-        self.logger.print(player_name + " was added")
+        self.logger.print(player.name + " was added")
         self.logger.print("They are player number %s" % len(self.players))
 
         return True
@@ -67,7 +70,7 @@ class Game:
         if self.places[player_id] > 11:
             self.places[player_id] = self.places[player_id] - 12
 
-        self.logger.print(self.players[player_id] +
+        self.logger.print(self.players[player_id].name +
                           '\'s new location is ' +
                           str(self.places[player_id]))
 
@@ -124,7 +127,7 @@ class Game:
 
     def add_coin(self, player_id):
         self.purses[player_id] += 1
-        self.logger.print(self.players[player_id] + ' now has ' + str(self.purses[player_id]) + ' Gold Coins.')
+        self.logger.print(self.players[player_id].name + ' now has ' + str(self.purses[player_id]) + ' Gold Coins.')
 
     def next_player(self):
         self.current_player += 1
@@ -147,7 +150,7 @@ class Game:
     def wrong_answer(self):
         self.logger.print('Question was incorrectly answered')
         self.logger.print(
-            self.players[self.current_player] + " was sent to the penalty box")
+            self.players[self.current_player].name + " was sent to the penalty box")
         self.in_penalty_box[self.current_player] = True
 
         self.next_player()
@@ -162,9 +165,9 @@ def main_loop(seed: int = None, logger: Logger = ConsoleLogger()):
 
     game = Game(logger)
 
-    game.add('Chet')
-    game.add('Pat')
-    game.add('Sue')
+    game.add(Player('Chet'))
+    game.add(Player('Pat'))
+    game.add(Player('Sue'))
 
     while True:
         game.roll(randrange(5) + 1)
