@@ -26,8 +26,8 @@ class GameTests(TestCase):
 
     def test_roll_printsCurrentPlayerAndRolledAmount(self):
         self.game.roll(10)
-        self.assertEqual('First is the current player', self.logger.lines[0])
-        self.assertEqual('They have rolled a 10', self.logger.lines[1])
+        self.assertEqual('First is the current player', self.logger.lines[4])
+        self.assertEqual('They have rolled a 10', self.logger.lines[5])
 
     def test_roll_printsNewLocationAndQuestion(self):
         self.board.get_category.return_value = 'TestCategory'
